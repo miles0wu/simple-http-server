@@ -19,7 +19,7 @@ build:
 	  -ldflags "-s -w -X main.BuildAt=`date +%FT%T%z`" \
 	  -o build/simple-http-server $(GOFILES)
 
-run: build
+run:
 	build/simple-http-server
 
 clean:
@@ -28,4 +28,4 @@ clean:
 docker:
 	docker build -t simple-http-server:$(VER) .
 
-.PHONY: build run clean image-build 
+.PHONY: build run clean docker
