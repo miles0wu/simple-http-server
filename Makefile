@@ -2,16 +2,22 @@ VER ?= latest
 GOFILES := $(wildcard cmd/api-server/*.go)
 
 ifeq ($(OS),Windows_NT)
-	GOARCH := $(PROCESSOR_ARCHITECTURE)
+	ARCH := $(PROCESSOR_ARCHITECTURE)
 	GOOS := windows
 else
-	GOARCH := $(shell uname -m)
+	ARCH := $(shell uname -m)
 	UNAME_S := $(shell uname -s)
 	ifeq ($(UNAME_S),Linux)
 		GOOS := linux
 	else ifeq ($(UNAME_S),Darwin)
 		GOOS := darwin
 	endif
+endif
+
+ifeq (`echo $(ARCH) | tr A-Z a-z`, arm64)
+	GOARCH=arm64
+else
+	GOARCH=amd64
 endif
 
 build:
