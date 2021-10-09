@@ -17,7 +17,7 @@ $ make docker
 
 ### run with docker
 ```
-$ docker run -d -p 8080:8080 simple-http-server:latest --name simple-http-server
+$ docker run -d -p 8080:8080 --name simple-http-server simple-http-server:latest
 $ docker logs -f simple-http-server
 ```
 
@@ -43,4 +43,19 @@ GLOBAL OPTIONS:
 ```
 GET /healthz
 200 OK
+```
+
+### Example
+```
+$ curl -i -H "test:123" 127.0.0.1:8080/healthz
+HTTP/1.1 200 OK
+Accept: */*
+Test: 123
+User-Agent: curl/7.64.1
+Version: 1.0.0
+Date: Sat, 09 Oct 2021 17:09:57 GMT
+Content-Length: 0
+
+$ docker logs -f simple-http-server
+2021/10/09 17:09:57 {"URI":"/healthz","IP":"172.17.0.1","Code":200}
 ```
