@@ -21,6 +21,14 @@ $ docker run -d -p 8080:8080 --name simple-http-server simple-http-server:latest
 $ docker logs -f simple-http-server
 ```
 
+### pull from dockerhub and run
+```
+$ docker run -d -P miles0wu/simple-http-server
+```
+
+## Image repository
+* [miles0wu/simple-http-server](https://hub.docker.com/r/miles0wu/simple-http-server)
+
 ## Usage
 ```
 NAME:
