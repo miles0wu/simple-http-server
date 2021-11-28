@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-http-server-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: simple-http-server
+  template:
+    metadata:
+      labels:
+        app: simple-http-server
+    spec:
+      containers:
+        - name: simple-http-server
+          image: docker.io/miles0wu/simple-http-server:latest
+          args: ["-port", "80"]
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: 80
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            successThreshold: 2
+          resources:
+            limits:
+              memory: 200Mi
+              cpu: 500m
+            requests:
+              memory: 100Mi
+              cpu: 200m
+      volumes:
+      - name: simple-http-server-config
+        configMap:
+          name: simple-http-server-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: simple-http-server-config
+data:
+  version: "v1.0.0"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-http-server
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+  selector:
+    app: simple-http-server

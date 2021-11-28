@@ -67,3 +67,6 @@ Content-Length: 0
 $ docker logs -f simple-http-server
 2021/10/09 17:09:57 {"URI":"/healthz","IP":"172.17.0.1","Code":200}
 ```
+
+### Deploy on kubernetes
+* [deploy.md](k8s-yaml/deploy.md)
