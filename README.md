@@ -7,7 +7,8 @@ Simple http server handle request with following rule:
 ## Getting Started
 ### install from source
 ```
-$ make build
+# default $ARCH=amd64
+$ make build ARCH=arm64
 ```
 
 ### build image and run with container
