@@ -9,6 +9,9 @@ spec:
       app: simple-http-server
   template:
     metadata:
+      annonations:
+        promethus.io/scrape: "true"
+        promethus.io/port: 80
       labels:
         app: simple-http-server
     spec:

@@ -81,5 +81,8 @@ $ docker logs -f simple-http-server
 2021/12/12 13:06:33 Respond in 1115 ms
 ```
 
-### Deploy on kubernetes
-* [deploy.md](k8s-yaml/deploy.md)
+### Deploy and ingress on kubernetes
+* [deploy.md](k8s-yaml/ingress/README.md)
+
+### Configure prometheus and grafana
+* [monitor.md](k8s-yaml/monitor/README.md)
