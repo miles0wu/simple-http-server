@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"log"
+	"math/rand"
 	"net"
 	"net/http"
 	"os"
@@ -13,6 +15,9 @@ import (
 	"syscall"
 	"time"
 
+	"simple-http-server/metrics"
+
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
 )
 
@@ -23,8 +28,12 @@ type AccessLog struct {
 }
 
 func action(c *cli.Context) (err error) {
+	metrics.Register()
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", index)
+	mux.HandleFunc("/healthz", healthz)
+	mux.Handle("/metrics", promhttp.Handler())
 
 	server := &http.Server{
 		Addr:    "0.0.0.0:" + c.String(_port),
@@ -50,7 +59,21 @@ func action(c *cli.Context) (err error) {
 	return server.Shutdown(ctx)
 }
 
+func healthz(w http.ResponseWriter, r *http.Request) {
+	io.WriteString(w, "ok\n")
+}
+
+func randInt(min int, max int) int {
+	rand.Seed(time.Now().UTC().UnixNano())
+	return min + rand.Intn(max-min)
+}
+
 func index(w http.ResponseWriter, r *http.Request) {
+	timer := metrics.NewTimer()
+	defer timer.ObserveTotal()
+	delay := randInt(0, 2000)
+	time.Sleep(time.Millisecond * time.Duration(delay))
+
 	for key, values := range r.Header {
 		w.Header().Add(key, strings.Join(values, ";"))
 	}
@@ -69,10 +92,6 @@ func index(w http.ResponseWriter, r *http.Request) {
 	}
 	accessLog.IP = reqIp
 
-	if accessLog.URI == "/healthz" {
-		accessLog.Code = http.StatusOK
-	}
-
 	w.WriteHeader(accessLog.Code)
 
 	j, err := json.Marshal(accessLog)
@@ -81,6 +100,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Println(string(j))
+	log.Printf("Respond in %d ms", delay)
 }
 
 func GetIP(r *http.Request) (string, error) {

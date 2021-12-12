@@ -52,11 +52,22 @@ GLOBAL OPTIONS:
 ```
 GET /healthz
 200 OK
+
+ok
+```
+
+#### Metrics
+Provide execution latency seconds metrics
+```
+GET /metrics
+200 OK
+
+...metrics...
 ```
 
 ### Example
 ```
-$ curl -i -H "test:123" 127.0.0.1:8080/healthz
+$ curl -i -H "test:123" 127.0.0.1:8080/hello
 HTTP/1.1 200 OK
 Accept: */*
 Test: 123
@@ -66,7 +77,8 @@ Date: Sat, 09 Oct 2021 17:09:57 GMT
 Content-Length: 0
 
 $ docker logs -f simple-http-server
-2021/10/09 17:09:57 {"URI":"/healthz","IP":"172.17.0.1","Code":200}
+2021/12/12 13:06:33 {"URI":"/hello","IP":"127.0.0.1","Code":200}
+2021/12/12 13:06:33 Respond in 1115 ms
 ```
 
 ### Deploy on kubernetes
