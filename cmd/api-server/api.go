@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -20,12 +20,6 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/urfave/cli/v2"
 )
-
-type AccessLog struct {
-	URI  string
-	IP   string
-	Code int
-}
 
 func action(c *cli.Context) (err error) {
 	metrics.Register()
@@ -74,32 +68,38 @@ func index(w http.ResponseWriter, r *http.Request) {
 	delay := randInt(0, 2000)
 	time.Sleep(time.Millisecond * time.Duration(delay))
 
-	for key, values := range r.Header {
-		w.Header().Add(key, strings.Join(values, ";"))
+	io.WriteString(w, "===========Details of the http request header:===========\n")
+
+	address, doTransfer := os.LookupEnv("TRANSFER_ADDRESS")
+	if doTransfer {
+		req, err := http.NewRequest("GET", address, nil)
+		if err != nil {
+			fmt.Printf("%s", err)
+		}
+
+		lowerCaseHeader := make(http.Header)
+		for k, v := range r.Header {
+			lowerCaseHeader[strings.ToLower(k)] = v
+		}
+
+		log.Printf("headers:", lowerCaseHeader)
+		req.Header = lowerCaseHeader
+		client := &http.Client{}
+		resp, err := client.Do(req)
+		if err != nil {
+			log.Printf("HTTP get failed with error: %s\n", err)
+		} else {
+			log.Println("HTTP get succeeded")
+		}
+		if resp != nil {
+			resp.Write(w)
+		}
+	} else {
+		for k, v := range r.Header {
+			io.WriteString(w, fmt.Sprintf("%s=%s\n", k, v))
+		}
 	}
 
-	w.Header().Add("VERSION", os.Getenv("VERSION"))
-
-	accessLog := AccessLog{
-		URI:  r.RequestURI,
-		IP:   "",
-		Code: http.StatusOK,
-	}
-
-	reqIp, err := GetIP(r)
-	if err != nil {
-		accessLog.Code = http.StatusBadRequest
-	}
-	accessLog.IP = reqIp
-
-	w.WriteHeader(accessLog.Code)
-
-	j, err := json.Marshal(accessLog)
-	if err != nil {
-		log.Println("fail to encode log: ", accessLog)
-		return
-	}
-	log.Println(string(j))
 	log.Printf("Respond in %d ms", delay)
 }
 
