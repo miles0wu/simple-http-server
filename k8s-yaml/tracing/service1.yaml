@@ -16,19 +16,11 @@ spec:
         - name: service1
           imagePullPolicy: Always
           image: miles0wu/simple-http-server:tracing
+          env:
+            - name: TRANSFER_ADDRESS
+              value: "http://service2"
           ports:
-            - containerPort: 80
-      volumes:
-      - name: service1-config
-        configMap:
-          name: service1-config
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: service1-config
-data:
-  TRANSFER_ADDRESS: "http://service2"
+            - containerPort: 8080
 ---
 apiVersion: v1
 kind: Service
@@ -39,6 +31,6 @@ spec:
     - name: http-service1
       port: 80
       protocol: TCP
-      targetPort: 80
+      targetPort: 8080
   selector:
     app: service1
